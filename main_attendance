@@ -1,0 +1,150 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "attendance.h"
+
+
+
+int main(void) {
+
+    Student students[MAX_STUDENTS];
+    int studentCount = loadStudents(students);
+
+    Database db ={0};
+
+    db.studentCount = loadStudents(db.students);
+
+    for(int i = 0; i < studentCount; i++)
+    {
+            db.students[i] = students[i];
+    }
+
+
+    int choice = 0;
+   
+    int droppedCount = 0;
+
+    do
+    {
+    printf("\n------Menu------\n");
+    printf("1. Display Students\n");
+    printf("2. Add Student\n");
+    printf("3. Remove Student\n");
+    printf("4. Edit Student\n");
+    printf("5. Record Attendance\n");
+    printf("6. Attendance Summary\n");
+    printf("7. Search Student\n");
+    printf("8. Attendance History and Dates\n");
+    printf("9. Save and exit.\n");
+    printf("-------------------------------\n");
+    printf("Enter your choice:\n");
+    scanf("%d", &choice);
+    switch(choice)
+        {
+        case 1:
+        
+        displayStudents(db.students, db.studentCount);
+                
+        break;
+                    
+	case 2:
+        if(db.studentCount < MAX_STUDENTS)
+        {
+            // Pass the pointer to the exact current slot in db.students
+            addStudent(db.students, db.studentCount, &db.students[db.studentCount]);
+            db.studentCount++;
+            printf("roster saved successfully.\n"); // optional feedback
+        }
+        else
+        {
+            printf("roster is FULL.\n");
+        }
+        break;
+        
+
+                
+        case 3:
+        removeStudent(db.students, &db.studentCount);
+        printf("after removal student count = %d\n", db.studentCount);
+        displayStudents(db.students, db.studentCount);
+            
+        break;
+                
+        case 4:
+        editStudent(db.students, db.studentCount);
+                
+        break;
+
+	case 5: 
+	recordAttendance(&db);
+	dropExcessAbsences(&db);
+
+	studentCount = db.studentCount;
+
+	for(int i = 0; i < db.studentCount; i++)
+	{
+		students[i] = db.students[i];
+	}
+	break;
+
+	case 6:
+	
+	printf("studentCount = %d\n", db.studentCount);
+	int i;
+	for (i = 0; i < studentCount; i++);
+	{
+		printf("%s %d\n", students[i].name, students[i].id);
+	}
+        db.studentCount = studentCount;
+          
+	for (int i = 0; i < studentCount; i++)
+	{                db.students[i] = students[i];
+	}
+	printf("entering summary...\n");
+ 	Student_summary(&db, droppedCount);
+        break;
+
+	case 7:
+{
+	FILE *fp = fopen("Attendance_tracker.csv", "r");
+
+	if (fp != NULL)
+	    {
+            while(getchar() != '\n');		    
+	    search_students(fp);
+            fclose(fp);
+	    }
+        else
+	{
+	printf("could not open file.\n");
+        }
+        break;	
+}	
+	
+	case 8:
+	displayAttendanceHistory(&db);	
+	break;
+
+
+	case 9:
+        printf("Saving %d students...\n", db.studentCount);
+
+        saveStudents(db.students, db.studentCount);
+        printf("roster is saved.\n");
+
+        break;
+
+        default:
+        printf("invalid choice.\n");
+        }
+        }
+
+    while(choice !=7);
+                    
+    
+
+return 0;
+
+    
+
+}
